@@ -1,12 +1,13 @@
 const loadPhones = async(searchText, dataLimit) =>{
+   
     const url = `https://openapi.programming-hero.com/api/phones?search=${searchText}`
     const res = await fetch(url);
     const data = await res.json();
-    displayPhones(data.data, dataLimit);
+    displayPhones(data.data, 2);
 }
 
 const displayPhones = (phones, dataLimit) =>{
-    console.log(phones);
+    console.log(dataLimit);
     const phonesContainer = document.getElementById('phones-container');
     // phonesContainer.textContent = '';
     // display 10 phones only 
@@ -87,7 +88,7 @@ document.getElementById('btn-show-all').addEventListener('click', function(){
 })
 
 const loadPhoneDetails = async id =>{
-    const url =`www.openapi.programming-hero.com/api/phone/${id}`;
+    const url =` https://openapi.programming-hero.com/api/phone/${id} `;
     const res = await fetch(url);
     const data = await res.json();
     displayPhoneDetails(data.data);
@@ -96,14 +97,17 @@ const loadPhoneDetails = async id =>{
 const displayPhoneDetails = phone =>{
     console.log(phone);
     const modalTitle = document.getElementById('phoneDetailModalLabel');
-    modalTitle.innerText = phone.name;
+    modalTitle.innerHTML = `${phone.name}`;
     const phoneDetails = document.getElementById('phone-details');
     console.log(phone.mainFeatures.sensors[0]);
     phoneDetails.innerHTML = `
-        <p>Release Date: ${phone?.releaseDate}</p>
-        <p>Storage: ${phone.mainFeatures}</p>
-        <p>Others: ${phone.others.phone.others.Bluetooth}</p>
-        <p>Sensor: ${phone.mainFeatures.sensors.phone.mainFeatures.sensors[0]}</p>
+    <div class="text-dark text-center">
+    <img src="${phone.image}" alt="">
+    <p>Release Date: ${phone.releaseDate}</p>
+    <p>Storage: ${phone.mainFeatures.storage}</p>
+    <p>Others: ${phone.mainFeatures.chipSet}</p>
+    <p>Sensor: ${phone.mainFeatures.sensors[0]}</p>
+</div>
     `
 }
 
