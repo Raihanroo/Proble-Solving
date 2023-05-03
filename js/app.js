@@ -1,39 +1,46 @@
-const loadPhones = async(searchText, dataLimit) =>{
-   
-    const url = `https://openapi.programming-hero.com/api/phones?search=${searchText}`
-    const res = await fetch(url);
-    const data = await res.json();
-    displayPhones(data.data, 2);
-}
+const phonesContainer = document.getElementById("phones-container");
+const showAll = document.getElementById("show-all");
+const noPhone = document.getElementById("no-found-message");
+const loaderSection = document.getElementById("loader");
+const searchField = document.getElementById("search-field");
+const searchForm = document.getElementById("search-form");
 
-const displayPhones = (phones, dataLimit) =>{
-    console.log(dataLimit);
-    const phonesContainer = document.getElementById('phones-container');
-    // phonesContainer.textContent = '';
-    // display 10 phones only 
-    const showAll = document.getElementById('show-all');
-    if(dataLimit && phones.length > 10) {
-        phones = phones.slice(0, 10);
-        showAll.classList.remove('d-none');
-    }
-    else{
-        showAll.classList.add('d-hidden');
-    }
-    
+const loadPhones = async (searchText) => {
+  searchText = searchText.toLowerCase();
 
-    // display no phones found
-    const noPhone = document.getElementById('no-found-message');
-    if(phones.length === 0){
-        noPhone.classList.remove('d-none');
-    }
-    else{
-        noPhone.classList.add('d-none');
-    }
-    // display all phones
-    phones.forEach(phone =>{
-        const phoneDiv  = document.createElement('div');
-        phoneDiv.classList.add('col');
-        phoneDiv.innerHTML = `
+  const url = `https://openapi.programming-hero.com/api/phones?search=${searchText}`;
+  const res = await fetch(url);
+  const data = await res.json();
+
+  showAll.onclick = () => {
+    showAll.classList.add("d-none");
+    displayPhones(data.data);
+  };
+
+  if (data.data.length > 10) {
+    showAll.classList.remove("d-none");
+  } else {
+    showAll.classList.add("d-none");
+  }
+
+  if (data.data.length === 0) {
+    noPhone.classList.remove("d-none");
+  } else {
+    noPhone.classList.add("d-none");
+  }
+
+  displayPhones(
+    searchText === "iphone" ? [data.data[0]] : data.data.slice(0, 10)
+  );
+};
+
+const displayPhones = (phones) => {
+  phonesContainer.innerHTML = "";
+  // display all phones
+  phones.forEach((phone) => {
+    const phoneDiv = document.createElement("div");
+    phoneDiv.classList.add("col");
+    phoneDiv.innerHTML = `
         <div class="card p-4">
             <img src="${phone?.image}" class="card-img-top" alt="...">
             <div class="card-body">
@@ -44,63 +51,44 @@ const displayPhones = (phones, dataLimit) =>{
             </div>
         </div>
         `;
-        phonesContainer.appendChild(phoneDiv);
-    });
-    // stop spinner or loader
-    toggleSpinner(false);
-}
+    phonesContainer.appendChild(phoneDiv);
+  });
+  // stop spinner or loader
+  toggleSpinner(false);
+};
 
-const processSearch = (dataLimit) =>{
-    toggleSpinner(true);
-    const searchField = document.getElementById('search-field');
-    const searchText = searchField.value;
-    loadPhones(searchText, dataLimit);
-    searchField.value = "";
-}
+searchForm.onsubmit = (e) => {
+  e.preventDefault();
 
-// handle search button click
-document.getElementById('btn-search').addEventListener('click', function(){
-    // start loader
-    processSearch(10);
-})
+  toggleSpinner(true);
+  const searchText = searchField.value;
+  loadPhones(searchText);
 
-// search input field enter key handler
-document.getElementById('search-field').addEventListener('keypress', function (e) {
-    if (e.key === 'enter') {
-        processSearch(10);
-    }
-});
+  searchForm.reset();
+};
 
-const toggleSpinner = isLoading => {
-    const loaderSection = document.getElementById('loader');
-    if(isLoading){
-        loaderSection.classList.remove('d-none')
-    }
-    else{
-        loaderSection.classList.add('d-none');
-    }
-}
+const toggleSpinner = (isLoading) => {
+  if (isLoading) {
+    loaderSection.classList.remove("d-none");
+  } else {
+    loaderSection.classList.add("d-none");
+  }
+};
 
+const loadPhoneDetails = async (id) => {
+  const url = ` https://openapi.programming-hero.com/api/phone/${id} `;
+  const res = await fetch(url);
+  const data = await res.json();
+  displayPhoneDetails(data.data);
+};
 
-// not the best way to load show All
-document.getElementById('btn-show-all').addEventListener('click', function(){
-    processSearch();
-})
-
-const loadPhoneDetails = async id =>{
-    const url =` https://openapi.programming-hero.com/api/phone/${id} `;
-    const res = await fetch(url);
-    const data = await res.json();
-    displayPhoneDetails(data.data);
-}
-
-const displayPhoneDetails = phone =>{
-    console.log(phone);
-    const modalTitle = document.getElementById('phoneDetailModalLabel');
-    modalTitle.innerHTML = `${phone.name}`;
-    const phoneDetails = document.getElementById('phone-details');
-    console.log(phone.mainFeatures.sensors[0]);
-    phoneDetails.innerHTML = `
+const displayPhoneDetails = (phone) => {
+  console.log(phone);
+  const modalTitle = document.getElementById("phoneDetailModalLabel");
+  modalTitle.innerHTML = `${phone.name}`;
+  const phoneDetails = document.getElementById("phone-details");
+  console.log(phone.mainFeatures.sensors[0]);
+  phoneDetails.innerHTML = `
     <div class="text-dark text-center">
     <img src="${phone.image}" alt="">
     <p>Release Date: ${phone.releaseDate}</p>
@@ -108,7 +96,7 @@ const displayPhoneDetails = phone =>{
     <p>Others: ${phone.mainFeatures.chipSet}</p>
     <p>Sensor: ${phone.mainFeatures.sensors[0]}</p>
 </div>
-    `
-}
+    `;
+};
 
-loadPhones('apple');
+loadPhones("apple");
